@@ -55,3 +55,8 @@ Logger configuration:
 ```
 LOG_LEVEL: debug
 ```
+
+Processing configuration:
+```
+CANCELLATION_TIME: 10 - time to cancel transactions, in minutes
+```
