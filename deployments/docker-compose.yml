@@ -23,6 +23,24 @@ services:
       DB_PASSWORD: admin
       DB_MAX_CONN: 10
       DB_ENABLE_LOG: 1
+  processing:
+    build:
+      context: ..
+      dockerfile: deployments/processing.Dockerfile
+    image: processing
+    depends_on:
+      - postgres
+      - migrate
+    environment:
+      CANCELLATION_TIME: 10
+      LOG_LEVEL: debug
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: postgres
+      DB_USER: admin
+      DB_PASSWORD: admin
+      DB_MAX_CONN: 10
+      DB_ENABLE_LOG: 1
   migrate:
     build:
       context: ..
