@@ -37,6 +37,7 @@ func NewService(storage Storage) (*Service, error) {
 	return &s, nil
 }
 
+// SourceTypeID returns all source types
 func (s *Service) SourceTypeID(_ context.Context, sourceType string) (int, error) {
 	id, ok := s.sourceTypes[sourceType]
 	if !ok {
@@ -54,6 +55,7 @@ func (s *Service) ProceedPayment(ctx context.Context, payment Payment) error {
 	return nil
 }
 
+// Balance returns account balance
 func (s *Service) Balance(ctx context.Context) (Account, error) {
 	return s.storage.Balance(ctx)
 }

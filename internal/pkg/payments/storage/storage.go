@@ -20,7 +20,7 @@ type PaymentStorage struct {
 	db *pg.DB
 }
 
-// Insert inserts user into users table.
+// SourceTypes returns source types.
 func (s *PaymentStorage) SourceTypes(ctx context.Context) ([]payments.SourceType, error) {
 	var sourceTypes []payments.SourceType
 	if err := s.db.ModelContext(ctx, &sourceTypes).Select(); err != nil {
@@ -30,7 +30,7 @@ func (s *PaymentStorage) SourceTypes(ctx context.Context) ([]payments.SourceType
 	return sourceTypes, nil
 }
 
-// Insert inserts user into users table.
+// ProceedPayment processed payment in DB.
 func (s *PaymentStorage) ProceedPayment(ctx context.Context, payment payments.Payment) error {
 	err := s.db.RunInTransaction(func(tx *pg.Tx) error {
 		_, err := tx.ModelContext(ctx, &payment).Insert()
@@ -76,6 +76,7 @@ func (s *PaymentStorage) ProceedPayment(ctx context.Context, payment payments.Pa
 	return err
 }
 
+// Balance returns account balance from DB
 func (s *PaymentStorage) Balance(ctx context.Context) (payments.Account, error) {
 	var account payments.Account
 	err := s.db.ModelContext(ctx, &account).

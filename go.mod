@@ -18,6 +18,7 @@ require (
 	github.com/rafaeljesus/retry-go v0.0.0-20171214204623-5981a380a879
 	github.com/robinjoseph08/go-pg-migrations/v2 v2.1.0
 	github.com/rs/cors v1.7.0
+	github.com/satori/go.uuid v1.2.0
 	github.com/segmentio/encoding v0.1.11 // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/swaggo/http-swagger v0.0.0-20200308142732-58ac5e232fba

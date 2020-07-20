@@ -22,7 +22,7 @@ to start application, database and migrations.
 
 ## How to use
 
-1. Make sure ports :8085/5432 are free
+1. Make sure ports :8085/:5432 are free
 2. Run `make up`
 3. Run tests `make test`
 4. See swagger documentation below

@@ -8,17 +8,17 @@ lint: ## Run linter for all project files
 	@echo "Done"
 
 .PHONY: test
-test: ## Run linter for all project files
+test: ## Run tests
 	@echo "Running tests..."
 	bash -c "go test tests/main_test.go -count=1 -v"
 	@echo "Done"
 
 .PHONY: swag
-swag: ## Run build for project
+swag: ## Run generating swagger documentation
 	bash -c "swag init -g cmd/api/main.go"
 
 .PHONY: build
-build: ## Run build for project
+build: ## Run build project
 	bash -c "docker-compose -f deployments/docker-compose.yml build"
 
 .PHONY: up
