@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -311,6 +312,155 @@ func TestConcurrentRequests(t *testing.T) {
 			}
 		})
 	}
+
+	balanceAfter, err := getBalance(&client)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if fmt.Sprintf("%.2f", balanceBefore+269.9) != fmt.Sprintf("%.2f", balanceAfter) {
+		t.Errorf(
+			"incorrect concurrent behavior: expected balance: %s, actual: %s",
+			fmt.Sprintf("%.2f", balanceBefore+269.9), fmt.Sprintf("%.2f", balanceAfter),
+		)
+	}
+}
+
+func TestCustomConcurrentRequests(t *testing.T) {
+	client := http.Client{Timeout: time.Duration(10) * time.Second}
+
+	type testData struct {
+		testName       string
+		state          string
+		amount         string
+		transactionID  string
+		contentType    string
+		sourceType     string
+		expectedStatus int
+		expectedResult string
+	}
+
+	testSuite := []testData{
+		{
+			testName:       "Request 7",
+			state:          "win",
+			amount:         "100",
+			contentType:    "application/json",
+			sourceType:     "payment",
+			expectedStatus: 200,
+			expectedResult: "{\"status\":true,\"message\":\"payment was successfully proceed\"}",
+		},
+		{
+			testName:       "Request 8",
+			state:          "lost",
+			amount:         "10",
+			contentType:    "application/json",
+			sourceType:     "payment",
+			expectedStatus: 200,
+			expectedResult: "{\"status\":true,\"message\":\"payment was successfully proceed\"}",
+		},
+		{
+			testName:       "Request 9",
+			state:          "win",
+			amount:         "100",
+			contentType:    "application/json",
+			sourceType:     "payment",
+			expectedStatus: 200,
+			expectedResult: "{\"status\":true,\"message\":\"payment was successfully proceed\"}",
+		},
+		{
+			testName:       "Request 10",
+			state:          "lost",
+			amount:         "10",
+			contentType:    "application/json",
+			sourceType:     "payment",
+			expectedStatus: 200,
+			expectedResult: "{\"status\":true,\"message\":\"payment was successfully proceed\"}",
+		},
+		{
+			testName:       "Request 11",
+			state:          "win",
+			amount:         "100",
+			transactionID:  "",
+			contentType:    "application/json",
+			sourceType:     "payment",
+			expectedStatus: 200,
+			expectedResult: "{\"status\":true,\"message\":\"payment was successfully proceed\"}",
+		},
+		{
+			testName:       "Request 12",
+			state:          "lost",
+			amount:         "10",
+			contentType:    "application/json",
+			sourceType:     "payment",
+			expectedStatus: 200,
+			expectedResult: "{\"status\":true,\"message\":\"payment was successfully proceed\"}",
+		},
+		{
+			testName:       "Request 13",
+			state:          "lost",
+			amount:         "0.1",
+			contentType:    "application/json",
+			sourceType:     "payment",
+			expectedStatus: 200,
+			expectedResult: "{\"status\":true,\"message\":\"payment was successfully proceed\"}",
+		},
+	}
+
+	balanceBefore, err := getBalance(&client)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(len(testSuite))
+	for _, ts := range testSuite {
+		go func(t *testing.T, td testData) {
+			defer wg.Done()
+			u := uuid.NewV4()
+			payload := payload{
+				State:         td.state,
+				Amount:        td.amount,
+				TransactionID: u.String(),
+			}
+			tpBytes, err := json.Marshal(payload)
+			if err != nil {
+				t.Fatal(err)
+			}
+			req, err := http.NewRequest("POST", paymentURL, bytes.NewBuffer(tpBytes))
+			if err != nil {
+				t.Fatal(err)
+			}
+			req.Header.Set("Content-Type", td.contentType)
+			req.Header.Set("Source-Type", td.sourceType)
+
+			resp, err := client.Do(req)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			body, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer func() {
+				errB := resp.Body.Close()
+				if errB != nil {
+					t.Error(errB)
+				}
+			}()
+
+			if td.expectedStatus != resp.StatusCode {
+				t.Errorf("wrong status code: expected: %d, actual: %d", td.expectedStatus, resp.StatusCode)
+			}
+
+			if td.expectedResult != "" && strings.TrimSpace(td.expectedResult) != strings.TrimSpace(string(body)) {
+				t.Errorf("wrong body: expected: %s, actual: %s", td.expectedResult, string(body))
+			}
+		}(t, ts)
+	}
+
+	wg.Wait()
 
 	balanceAfter, err := getBalance(&client)
 	if err != nil {
