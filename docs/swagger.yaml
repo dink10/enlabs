@@ -1,0 +1,127 @@
+definitions:
+  provider.paymentRequest:
+    properties:
+      amount:
+        type: string
+      state:
+        type: string
+      transactionId:
+        type: string
+    required:
+    - amount
+    - transactionId
+    type: object
+  provider.paymentsResponse:
+    properties:
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
+  server.ErrorResponse:
+    properties:
+      error:
+        type: string
+      status:
+        type: boolean
+    type: object
+  server.Response:
+    properties:
+      status:
+        type: boolean
+    type: object
+info:
+  contact: {}
+  license: {}
+paths:
+  /health:
+    get:
+      description: End-point providing health-check functionality
+      operationId: health-check
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Status
+          schema:
+            $ref: '#/definitions/server.Response'
+      summary: Health check
+      tags:
+      - Health Check
+  /swagger/index.html:
+    get:
+      description: UI for swagger documentation
+      operationId: swagger-docs
+      produces:
+      - text/html
+      summary: Swagger Docs
+      tags:
+      - Swagger
+  /v1/payments:
+    post:
+      consumes:
+      - application/json
+      description: Process payment in database
+      operationId: payment-create
+      parameters:
+      - description: Payment data to create
+        in: body
+        name: payment
+        required: true
+        schema:
+          $ref: '#/definitions/provider.paymentRequest'
+          type: object
+      - description: With the bearer started
+        in: header
+        name: Source-Type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Proceeded payment
+          schema:
+            $ref: '#/definitions/provider.paymentsResponse'
+        "400":
+          description: Invalid Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "404":
+          description: Account Not Found
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "500":
+          description: Service Error
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      summary: Payment processing
+      tags:
+      - Account
+  /v1/payments/balance:
+    get:
+      description: Balance
+      operationId: show-balance
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Balance
+          schema:
+            $ref: '#/definitions/provider.paymentsResponse'
+        "400":
+          description: Invalid Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "500":
+          description: Service Error
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      summary: Account Balance
+      tags:
+      - Balance
+swagger: "2.0"

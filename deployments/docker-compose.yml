@@ -1,0 +1,48 @@
+version: "3"
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: deployments/api.Dockerfile
+    image: payments
+    depends_on:
+      - postgres
+      - migrate
+    ports:
+      - 8085:3000
+    environment:
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: 3000
+      SERVER_LOG_REQUESTS: 1
+      LOG_LEVEL: debug
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: postgres
+      DB_USER: admin
+      DB_PASSWORD: admin
+      DB_MAX_CONN: 10
+      DB_ENABLE_LOG: 1
+  migrate:
+    build:
+      context: ..
+      dockerfile: deployments/migrate.Dockerfile
+    image: migrate
+    depends_on:
+      - postgres
+    environment:
+      LOG_LEVEL: debug
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: postgres
+      DB_USER: admin
+      DB_PASSWORD: admin
+      DB_MAX_CONN: 10
+  postgres:
+    image: postgres:13-alpine
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin

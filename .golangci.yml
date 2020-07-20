@@ -1,0 +1,63 @@
+run:
+  # This turns off linter in tests.
+  tests: false
+
+linters-settings:
+  govet:
+    check-shadowing: true
+  goconst:
+    min-len: 2
+    min-occurrences: 2
+  lll:
+    line-length: 120
+    tab-width: 4
+  goimports:
+    local-prefixes: github.com/dink10/application
+  gocritic:
+    enabled-tags:
+      - performance
+      - style
+      - experimental
+      - diagnostic
+    disabled-checks:
+      - hugeParam
+
+linters:
+  enable:
+    - bodyclose
+    - deadcode
+    - depguard
+    - errcheck
+    - gochecknoinits
+    - goconst
+    - gocritic
+    - gofmt
+    - goimports
+    - golint
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - interfacer
+    - lll
+    - misspell
+    - nakedret
+    - scopelint
+    - staticcheck
+    - structcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - varcheck
+    - prealloc
+
+issues:
+  # This turns off the default excludes - which was causing the linter
+  # to miss things like erroneous comments
+  exclude-use-default: false
+  exclude-rules:
+    - text: "ST1000" # turns off 'at least one file in a package should have a package comment' warning
+      linters:
+        - stylecheck
